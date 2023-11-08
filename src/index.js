@@ -1,9 +1,15 @@
-import { createRoot} from 'react-dom/client'
-import './styles.css';
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+import Overlay from "./Overlay";
 
-import {App as Canvas } from './Canvas'
+import { App as Canvas } from "./Canvas";
 
-const rootElement = document.getElementById('root')
-const root = createRoot(rootElement)
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
 
-root.render(<Canvas />)
+root.render(
+  <>
+    <Canvas />
+    <Overlay />
+  </>
+);
