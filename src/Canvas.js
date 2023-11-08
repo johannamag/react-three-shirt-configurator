@@ -6,19 +6,18 @@ import {
   AccumulativeShadows,
   RandomizedLight,
   Decal,
-  useTexture
+  useTexture,
 } from "@react-three/drei";
 import { useRef } from "react";
-import { RawShaderMaterial } from "three";
-import {easing} from 'maath'
+import { easing } from "maath";
 
-import { useSnapshot } from 'valtio'
-import { state } from './store'
+import { useSnapshot } from "valtio";
+import { state } from "./store";
 
 export const App = ({ position = [-1, 0, 2.5], fov = 25 }) => (
   <Canvas
     shadows
-    gl={{preserveDrawingBuffer: true}}
+    gl={{ preserveDrawingBuffer: true }}
     eventSource={document.getElementById("root")}
     eventPrefix="client"
     camera={{ position, fov }}
@@ -35,14 +34,14 @@ export const App = ({ position = [-1, 0, 2.5], fov = 25 }) => (
 );
 
 function Shirt(props) {
-  const snap = useSnapshot(state)
+  const snap = useSnapshot(state);
 
-  const texture = useTexture(`/${snap.selectedDecal}.png`)
+  const texture = useTexture(`/${snap.selectedDecal}.png`);
   const { nodes, materials } = useGLTF("/shirt_baked_collapsed.glb");
 
   useFrame((state, delta) =>
     easing.dampC(materials.lambert1.color, snap.selectedColor, 0.25, delta)
-  )
+  );
   return (
     <group {...props} dispose={null}>
       <mesh
@@ -53,20 +52,31 @@ function Shirt(props) {
         {...props}
         dispose={null}
       >
-        <Decal position={[0, 0.04, 0.15]} rotation={[0,0,0]} scale={0.15} map={texture} mapAnisotrophy={16} />
+        <Decal
+          position={[0, 0.04, 0.15]}
+          rotation={[0, 0, 0]}
+          scale={0.15}
+          map={texture}
+          mapAnisotrophy={16}
+        />
       </mesh>
     </group>
   );
 }
 
 function Backdrop() {
-  const shadows = useRef()
+  const shadows = useRef();
   useFrame((state, delta) =>
-    easing.dampC(shadows.current.getMesh().material.color, state.selectedColor, 0.25, delta)
-  )
+    easing.dampC(
+      shadows.current.getMesh().material.color,
+      state.selectedColor,
+      0.25,
+      delta
+    )
+  );
   return (
     <AccumulativeShadows
-    ref={shadows}
+      ref={shadows}
       temporal
       frames={60}
       alphaTest={0.85}
@@ -93,22 +103,19 @@ function Backdrop() {
 }
 
 function CameraRig({ children }) {
-    const group = useRef()
-    useFrame((state, delta) =>{
-        easing.dampE(
-            group.current.rotation,
-            [state.pointer.y / 8, -state.pointer.x / 3, 0],
-            0.35,
-            delta
-        )
-    })
+  const group = useRef();
 
-    return (
-        <group ref={group}>
-            {children}
-        </group>
+  useFrame((state, delta) => {
+    easing.dampE(
+      group.current.rotation,
+      [state.pointer.y / 10, -state.pointer.x / 5, 0],
+      0.25,
+      delta
     )
+  })
+
+  return <group ref={group}>{children}</group>;
 }
 
 useGLTF.preload("/shirt_baked_collapsed.glb");
-["/react.png", "/three2.png", "/pmndrs.png"].forEach(useTexture.preload)
+["/react.png", "/three2.png", "/pmndrs.png"].forEach(useTexture.preload);
