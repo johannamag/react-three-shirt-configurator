@@ -35,7 +35,12 @@ function Intro() {
               customization tool. <strong>Unleash your imagination </strong>
               and define your own style.
             </p>
-            <button onClick={() => {state.intro = false}} style={{ background: "black" }}>
+            <button
+              onClick={() => {
+                state.intro = false;
+              }}
+              style={{ background: "black" }}
+            >
               CUSTOMIZE IT
               <AiOutlineHighlight size="1.3em" />
             </button>
@@ -47,24 +52,18 @@ function Intro() {
 }
 
 function Customizer() {
-  const colors = [
-    "#ccc",
-    "#efbd4e",
-    "#80c670",
-    "#726de8",
-    "#ef674e",
-    "#353934",
-  ];
-  const decals = ["react", "three2", "pmndrs"];
+  const snap = useSnapshot(state);
+
   return (
     <section key="custom">
       <div className="customizer">
         <div className="color-options">
-          {colors.map((color) => (
+          {snap.colors.map((color) => (
             <div
               key={color}
               className="circle"
               style={{ background: color }}
+              onClick={() => (state.selectedColor = color)}
             ></div>
           ))}
         </div>
@@ -72,19 +71,44 @@ function Customizer() {
 
       <div className="decals">
         <div className="decals--container">
-          {decals.map((decal) => (
-            <div key={decal} className="decal">
+          {snap.decals.map((decal) => (
+            <div
+              onClick={() => (state.selectedDecal = decal)}
+              key={decal}
+              className="decal"
+            >
               <img src={decal + "_thumb.png"} alt="brand" />
             </div>
           ))}
         </div>
       </div>
 
-      <button className="share" style={{ background: "black" }}>
+      <button
+        className="share"
+        style={{ background: snap.selectedColor }}
+        onClick={() => {
+          const link = document.createElement("a");
+          link.setAttribute("download", "canvas.png");
+          link.setAttribute(
+            "href",
+            document
+              .querySelector("canvas")
+              .toDataURL("image/png")
+              .replace("image/png", "image/octet-stream")
+          );
+          link.click();
+        }}
+      >
         DOWNLOAD
         <AiFillCamera size="1.3rem" />
       </button>
-      <button onClick={() => {state.intro = true}} className="exit" style={{ background: "black" }}>
+      <button
+        onClick={() => {
+          state.intro = true;
+        }}
+        className="exit"
+        style={{ background: snap.selectedColor }}
+      >
         GO BACK
         <AiOutlineArrowLeft size="1.3rem" />
       </button>

@@ -5,14 +5,20 @@ import {
   Environment,
   AccumulativeShadows,
   RandomizedLight,
+  Decal,
+  useTexture
 } from "@react-three/drei";
 import { useRef } from "react";
 import { RawShaderMaterial } from "three";
 import {easing} from 'maath'
 
+import { useSnapshot } from 'valtio'
+import { state } from './store'
+
 export const App = ({ position = [-1, 0, 2.5], fov = 25 }) => (
   <Canvas
     shadows
+    gl={{preserveDrawingBuffer: true}}
     eventSource={document.getElementById("root")}
     eventPrefix="client"
     camera={{ position, fov }}
@@ -29,7 +35,14 @@ export const App = ({ position = [-1, 0, 2.5], fov = 25 }) => (
 );
 
 function Shirt(props) {
+  const snap = useSnapshot(state)
+
+  const texture = useTexture(`/${snap.selectedDecal}.png`)
   const { nodes, materials } = useGLTF("/shirt_baked_collapsed.glb");
+
+  useFrame((state, delta) =>
+    easing.dampC(materials.lambert1.color, snap.selectedColor, 0.25, delta)
+  )
   return (
     <group {...props} dispose={null}>
       <mesh
@@ -37,14 +50,23 @@ function Shirt(props) {
         receiveShadow
         geometry={nodes.T_Shirt_male.geometry}
         material={materials.lambert1}
-      />
+        {...props}
+        dispose={null}
+      >
+        <Decal position={[0, 0.04, 0.15]} rotation={[0,0,0]} scale={0.15} map={texture} mapAnisotrophy={16} />
+      </mesh>
     </group>
   );
 }
 
 function Backdrop() {
+  const shadows = useRef()
+  useFrame((state, delta) =>
+    easing.dampC(shadows.current.getMesh().material.color, state.selectedColor, 0.25, delta)
+  )
   return (
     <AccumulativeShadows
+    ref={shadows}
       temporal
       frames={60}
       alphaTest={0.85}
@@ -89,3 +111,4 @@ function CameraRig({ children }) {
 }
 
 useGLTF.preload("/shirt_baked_collapsed.glb");
+["/react.png", "/three2.png", "/pmndrs.png"].forEach(useTexture.preload)
